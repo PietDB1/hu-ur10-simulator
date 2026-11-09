@@ -54,6 +54,37 @@ class Robot:
         pose = [round(p, 5) for p in pose]
         self.regels.append(f"movel(p{pose}, a={VERSNELLING_LINEAIR}, v={snelheid})")
 
+    def startpositie(self):
+        """Ga naar de veilige startpositie (arm rechtop, gripper naar beneden)."""
+        self.beweeg_gewrichten([0, -90, 90, -90, -90, 0])
+
+    def beweeg_relatief(self, dx=0, dy=0, dz=0, snelheid=SNELHEID_LINEAIR):
+        """Beweeg in een rechte lijn een stukje (mm) vanaf de huidige positie."""
+        d = [round(v / 1000, 5) for v in (dx, dy, dz)]
+        self.regels.append(
+            f"movel(pose_add(get_actual_tcp_pose(), p[{d[0]}, {d[1]}, {d[2]}, 0, 0, 0]), "
+            f"a={VERSNELLING_LINEAIR}, v={snelheid})")
+
+    # Richtingen t.o.v. de robotvoet. Staat de robot bij jullie anders opgesteld,
+    # draai dan hieronder de plus- en mintekens om.
+    def omhoog(self, mm):        self.beweeg_relatief(dz=mm)
+    def omlaag(self, mm):        self.beweeg_relatief(dz=-mm)
+    def naar_links(self, mm):    self.beweeg_relatief(dy=mm)
+    def naar_rechts(self, mm):   self.beweeg_relatief(dy=-mm)
+    def naar_voren(self, mm):    self.beweeg_relatief(dx=-mm)
+    def naar_achteren(self, mm): self.beweeg_relatief(dx=mm)
+
+    def draai_basis(self, graden, snelheid=SNELHEID_GEWRICHT):
+        """Draai de hele arm om de voet (positief = linksom)."""
+        d = round(math.radians(graden), 5)
+        self.regels.append("q = get_actual_joint_positions()")
+        self.regels.append(
+            f"movej([q[0] + {d}, q[1], q[2], q[3], q[4], q[5]], a={VERSNELLING_GEWRICHT}, v={snelheid})")
+
+    def grijper(self, dicht):
+        """Gripper dicht (True) of open (False). Gripper zit op digitale uitgang 0."""
+        self.uitgang(0, dicht)
+
     def wacht(self, seconden):
         self.regels.append(f"sleep({float(seconden)})")
 

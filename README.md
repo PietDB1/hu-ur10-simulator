@@ -7,13 +7,22 @@ Alles draait in je browser. Je hoeft niets te installeren.
 1. Log in op GitHub (gratis account).
 2. Klik op de groene knop **Code → Codespaces → Create codespace on main**.
 3. Wacht tot VS Code in je browser geladen is (de eerste keer duurt dit een paar minuten).
-4. Kijk onderin bij **Terminal**. Zodra de robot klaar is, verschijnt daar **ROBOT KLAAR!** met een link.
-   Klik op die link met **Cmd + klik** (Mac) of **Ctrl + klik** (Windows).
+4. Kijk onderin bij **Terminal**. Zodra de robot klaar is, verschijnt daar **ROBOT KLAAR!** met twee links:
+   het **robotscherm** en de **blokken**. Open ze met **Cmd + klik** (Mac) of **Ctrl + klik** (Windows).
 5. Klik op **Connect** als die knop verschijnt. Je ziet nu het bedieningsscherm van de robot (PolyScope).
    Is het scherm zwart? Wacht 1 minuut. PolyScope start iets later op.
 6. Zet de robot aan: **Go to initialization screen → ON → START → OK**.
 
-## Je eerste programma
+## Programmeren met blokken (makkelijkst)
+1. Open de link **Programmeren met blokken** uit de terminal (of tabblad **Poorten** → regel 8000 → wereldbolletje).
+2. Klik op **⚡ Robot aanzetten** (hoeft maar één keer).
+3. Sleep blokken uit de categorieën links naar het werkblad: **Beweging**, **Gripper**, **Herhalen**, enzovoort.
+4. Klik op **▶ Uitvoeren** en kijk in het robotscherm hoe de arm beweegt.
+   Rechts zie je de Python-code die bij jouw blokken hoort.
+
+Je blokken worden in je browser bewaard. Met **⬇ Download .py** sla je het programma op als Python-bestand.
+
+## Je eerste programma in Python
 Ga terug naar het tabblad met VS Code. Open `voorbeelden/01_eerste_beweging.py` en klik rechtsboven op ▶ (*Run Python File*).
 Kijk in het robottabblad, bij **Move** of **Program → Graphics**: de arm beweegt!
 

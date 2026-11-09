@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robot Blokken – HU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Public+Sans:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/blockly@11.2.2/blockly_compressed.js"></script>
+<script src="https://unpkg.com/blockly@11.2.2/blocks_compressed.js"></script>
+<script src="https://unpkg.com/blockly@11.2.2/python_compressed.js"></script>
+<script src="https://unpkg.com/blockly@11.2.2/msg/nl.js"></script>
+<style>
+  :root {
+    --bg: #f4f4f2; --paneel: #ffffff; --tekst: #1d1d1b; --zacht: #6b6b66;
+    --rand: #dcdcd6; --balk: #1d1d1b; --accent: #e3051b; --groen: #1f8a4c; --code: #f7f7f4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--tekst);
+    font-family: "Public Sans", system-ui, sans-serif; }
+  header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: var(--balk); color: #fff; padding: 10px 16px; }
+  header h1 { font-family: Oswald, sans-serif; font-weight: 600; font-size: 20px;
+    letter-spacing: .5px; margin: 0 12px 0 0; text-transform: uppercase; }
+  header h1 span { color: var(--accent); }
+  button, .knop { font: 600 14px "Public Sans", sans-serif; border: 0; border-radius: 6px;
+    padding: 8px 14px; cursor: pointer; text-decoration: none; color: #fff; background: #3b3b38; }
+  button:hover, .knop:hover { filter: brightness(1.15); }
+  #uitvoeren { background: var(--groen); font-size: 15px; padding: 8px 18px; }
+  #stop { background: var(--accent); }
+  .rechts { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+  main { display: flex; height: calc(100% - 56px); }
+  #werkblad { flex: 1; min-width: 0; }
+  aside { width: 360px; display: flex; flex-direction: column; border-left: 1px solid var(--rand);
+    background: var(--paneel); }
+  aside h2 { font-family: Oswald, sans-serif; font-weight: 500; font-size: 15px; text-transform: uppercase;
+    letter-spacing: .5px; margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--rand); color: var(--zacht); }
+  pre { margin: 0; padding: 12px 14px; font: 13px/1.5 ui-monospace, Menlo, monospace; overflow: auto;
+    white-space: pre-wrap; background: var(--code); }
+  #python { flex: 1; }
+  #uitvoer { height: 150px; border-top: 1px solid var(--rand); background: #fff; }
+  .ok { color: var(--groen); } .fout { color: var(--accent); }
+  @media (max-width: 800px) {
+    main { flex-direction: column; height: auto; }
+    #werkblad { height: 70vh; }
+    aside { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Robot <span>blokken</span></h1>
+  <button id="uitvoeren">▶ Uitvoeren</button>
+  <button id="stop">■ Stop</button>
+  <button id="aanzetten">⚡ Robot aanzetten</button>
+  <div class="rechts">
+    <a class="knop" id="robotlink" target="_blank">🤖 Open robotscherm</a>
+    <button id="download">⬇ Download .py</button>
+    <button id="leeg">🗑 Leeg</button>
+  </div>
+</header>
+<main>
+  <div id="werkblad"></div>
+  <aside>
+    <h2>Python-code van jouw blokken</h2>
+    <pre id="python"></pre>
+    <h2>Berichten</h2>
+    <pre id="uitvoer">Sleep blokken naar het werkblad en klik op ▶ Uitvoeren.</pre>
+  </aside>
+</main>
+
+<script>
+// ---------- Eigen robotblokken ----------
+const KLEUR_BEWEGING = 210, KLEUR_GRIJPER = 20, KLEUR_ROBOT = 0, KLEUR_TIJD = 290;
+
+Blockly.defineBlocksWithJsonArray([
+  { type: "robot_start", message0: "ga naar startpositie",
+    previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING,
+    tooltip: "Arm rechtop, gripper wijst naar beneden" },
+  { type: "robot_richting", message0: "beweeg %1 %2 mm",
+    args0: [
+      { type: "field_dropdown", name: "RICHTING", options: [
+        ["omhoog", "omhoog"], ["omlaag", "omlaag"], ["naar links", "naar_links"],
+        ["naar rechts", "naar_rechts"], ["naar voren", "naar_voren"], ["naar achteren", "naar_achteren"]]},
+      { type: "input_value", name: "MM", check: "Number" }],
+    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING,
+    tooltip: "Beweeg in een rechte lijn vanaf waar de arm nu is" },
+  { type: "robot_draai", message0: "draai de arm %1 graden",
+    args0: [{ type: "input_value", name: "GRADEN", check: "Number" }],
+    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING,
+    tooltip: "Draai de hele arm om de voet. Positief = linksom" },
+  { type: "robot_punt", message0: "ga naar punt x %1 y %2 z %3 (mm)",
+    args0: [
+      { type: "input_value", name: "X", check: "Number" },
+      { type: "input_value", name: "Y", check: "Number" },
+      { type: "input_value", name: "Z", check: "Number" }],
+    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING,
+    tooltip: "Ga in een rechte lijn naar een vaste plek (mm vanaf de robotvoet)" },
+  { type: "robot_grijper", message0: "gripper %1",
+    args0: [{ type: "field_dropdown", name: "STAND", options: [["dicht", "True"], ["open", "False"]] }],
+    previousStatement: null, nextStatement: null, colour: KLEUR_GRIJPER,
+    tooltip: "Pak iets vast (dicht) of laat los (open)" },
+  { type: "robot_wacht", message0: "wacht %1 seconden",
+    args0: [{ type: "input_value", name: "SEC", check: "Number" }],
+    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_TIJD },
+  { type: "robot_bericht", message0: "toon bericht %1",
+    args0: [{ type: "field_input", name: "TEKST", text: "Hallo!" }],
+    previousStatement: null, nextStatement: null, colour: KLEUR_ROBOT,
+    tooltip: "Laat een tekst zien in het logboek van de robot" }
+]);
+
+const gen = python.pythonGenerator, O = python.Order;
+const getal = (b, naam) => gen.valueToCode(b, naam, O.NONE) || "0";
+gen.forBlock["robot_start"]    = () => "r.startpositie()\n";
+gen.forBlock["robot_richting"] = b => `r.${b.getFieldValue("RICHTING")}(${getal(b, "MM")})\n`;
+gen.forBlock["robot_draai"]    = b => `r.draai_basis(${getal(b, "GRADEN")})\n`;
+gen.forBlock["robot_punt"]     = b => `r.beweeg_lineair(${getal(b, "X")}, ${getal(b, "Y")}, ${getal(b, "Z")})\n`;
+gen.forBlock["robot_grijper"]  = b => `r.grijper(${b.getFieldValue("STAND")})\n`;
+gen.forBlock["robot_wacht"]    = b => `r.wacht(${getal(b, "SEC")})\n`;
+gen.forBlock["robot_bericht"]  = b => `r.bericht(${JSON.stringify(b.getFieldValue("TEKST"))})\n`;
+
+// ---------- Gereedschapskist ----------
+const getalVak = (naam, w) => ({ [naam]: { shadow: { type: "math_number", fields: { NUM: w } } } });
+const toolbox = { kind: "categoryToolbox", contents: [
+  { kind: "category", name: "Beweging", colour: KLEUR_BEWEGING, contents: [
+    { kind: "block", type: "robot_start" },
+    { kind: "block", type: "robot_richting", inputs: getalVak("MM", 100) },
+    { kind: "block", type: "robot_draai", inputs: getalVak("GRADEN", 45) },
+    { kind: "block", type: "robot_punt", inputs: { ...getalVak("X", -500), ...getalVak("Y", -200), ...getalVak("Z", 300) } } ]},
+  { kind: "category", name: "Gripper", colour: KLEUR_GRIJPER, contents: [
+    { kind: "block", type: "robot_grijper" } ]},
+  { kind: "category", name: "Tijd en tekst", colour: KLEUR_TIJD, contents: [
+    { kind: "block", type: "robot_wacht", inputs: getalVak("SEC", 1) },
+    { kind: "block", type: "robot_bericht" } ]},
+  { kind: "category", name: "Herhalen", colour: 120, contents: [
+    { kind: "block", type: "controls_repeat_ext", inputs: getalVak("TIMES", 3) },
+    { kind: "block", type: "controls_for", inputs: { ...getalVak("FROM", 1), ...getalVak("TO", 3), ...getalVak("BY", 1) } },
+    { kind: "block", type: "controls_if" },
+    { kind: "block", type: "logic_compare" } ]},
+  { kind: "category", name: "Rekenen", colour: 230, contents: [
+    { kind: "block", type: "math_number", fields: { NUM: 50 } },
+    { kind: "block", type: "math_arithmetic" } ]},
+  { kind: "category", name: "Variabelen", colour: 330, custom: "VARIABLE" }
+]};
+
+const werkblad = Blockly.inject("werkblad", {
+  toolbox, trashcan: true, scrollbars: true,
+  media: "https://unpkg.com/blockly@11.2.2/media/",
+  zoom: { controls: true, wheel: true, startScale: 1.0 },
+  grid: { spacing: 24, length: 3, colour: "#ddd", snap: true }
+});
+
+// ---------- Voorbeeldprogramma ----------
+const voorbeeld = { blocks: { languageVersion: 0, blocks: [{
+  type: "robot_start", x: 40, y: 40, next: { block: {
+  type: "controls_repeat_ext", inputs: { TIMES: { shadow: { type: "math_number", fields: { NUM: 2 } } },
+    DO: { block: { type: "robot_richting", fields: { RICHTING: "omlaag" },
+      inputs: { MM: { shadow: { type: "math_number", fields: { NUM: 100 } } } },
+      next: { block: { type: "robot_grijper", fields: { STAND: "True" },
+      next: { block: { type: "robot_richting", fields: { RICHTING: "omhoog" },
+      inputs: { MM: { shadow: { type: "math_number", fields: { NUM: 100 } } } },
+      next: { block: { type: "robot_draai", inputs: { GRADEN: { shadow: { type: "math_number", fields: { NUM: 45 } } } },
+      next: { block: { type: "robot_grijper", fields: { STAND: "False" } } } } } } } } } } } } } } }] } };
+
+const OPSLAG = "robotblokken-werkblad";
+function laad() {
+  let data = null;
+  try { data = JSON.parse(localStorage.getItem(OPSLAG)); } catch (e) {}
+  Blockly.serialization.workspaces.load(data && data.blocks ? data : voorbeeld, werkblad);
+}
+function bewaar() {
+  try { localStorage.setItem(OPSLAG, JSON.stringify(Blockly.serialization.workspaces.save(werkblad))); } catch (e) {}
+}
+
+// ---------- Python-code tonen ----------
+function maakCode() {
+  const lijf = gen.workspaceToCode(werkblad);
+  return "from robot import Robot\n\nr = Robot()\n\n" + lijf + "\nr.start()\n";
+}
+function toonCode() { document.getElementById("python").textContent = maakCode(); bewaar(); }
+werkblad.addChangeListener(e => { if (!e.isUiEvent) toonCode(); });
+
+// ---------- Knoppen ----------
+const uitvoer = document.getElementById("uitvoer");
+async function stuur(pad, body) {
+  uitvoer.className = ""; uitvoer.textContent = "Bezig...";
+  try {
+    const res = await fetch(pad, { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body || {}) });
+    const d = await res.json();
+    uitvoer.className = d.ok ? "ok" : "fout";
+    uitvoer.textContent = d.uitvoer || (d.ok ? "Klaar." : "Er ging iets mis.");
+  } catch (e) {
+    uitvoer.className = "fout";
+    uitvoer.textContent = "Geen verbinding met de blokkenserver. Ververs de pagina.";
+  }
+}
+document.getElementById("uitvoeren").onclick = () => stuur("/uitvoeren", { code: maakCode() });
+document.getElementById("stop").onclick = () => stuur("/stop");
+document.getElementById("aanzetten").onclick = () => stuur("/aanzetten");
+document.getElementById("leeg").onclick = () => { if (werkblad.getAllBlocks(false).length) { werkblad.clear(); toonCode(); } };
+document.getElementById("download").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([maakCode()], { type: "text/x-python" }));
+  a.download = "mijn_robotprogramma.py"; a.click();
+};
+
+// Link naar het robotscherm (poort 6080)
+const host = location.host.includes("-8000.")
+  ? location.protocol + "//" + location.host.replace("-8000.", "-6080.")
+  : location.protocol + "//" + location.hostname + ":6080";
+document.getElementById("robotlink").href = host + "/vnc.html?autoconnect=true&resize=scale";
+
+laad();
+toonCode();
+</script>
+</body>
+</html>
