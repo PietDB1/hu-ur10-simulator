@@ -1,25 +1,29 @@
 # UR10 robot-simulator – Hogeschool Utrecht
 
-Programmeer een echte industriële robotarm (Universal Robots UR10) – eerst in de simulator, daarna in het echt bij de HU.
-Alles draait in je browser: je hoeft niets te installeren.
+Programmeer een echte industriële robotarm (Universal Robots UR10): eerst in de simulator, daarna in het echt bij de HU.
+Alles draait in je browser. Je hoeft niets te installeren.
 
-## Starten (± 3 minuten)
+## Starten (± 5 minuten)
 1. Log in op GitHub (gratis account).
 2. Klik op de groene knop **Code → Codespaces → Create codespace on main**.
 3. Wacht tot VS Code in je browser geladen is (de eerste keer duurt dit een paar minuten).
-4. Open de robot: tabblad **PORTS** (onderin) → regel **Robot (PolyScope)** → klik op het wereldbol-icoon.
-   Zet achter het adres: `/vnc.html?autoconnect=true&resize=scale` en druk op Enter.
-5. In PolyScope: klik op **ON** en daarna **START** (of laat `r.zet_aan()` dat doen).
+4. Kijk onderin bij **Terminal**. Zodra de robot klaar is, verschijnt daar **ROBOT KLAAR!** met een link.
+   Klik op die link met **Cmd + klik** (Mac) of **Ctrl + klik** (Windows).
+5. Klik op **Connect** als die knop verschijnt. Je ziet nu het bedieningsscherm van de robot (PolyScope).
+   Is het scherm zwart? Wacht 1 minuut. PolyScope start iets later op.
+6. Zet de robot aan: **Go to initialization screen → ON → START → OK**.
 
 ## Je eerste programma
-Open `voorbeelden/01_eerste_beweging.py` en klik rechtsboven op ▶ (*Run Python File*).
-Kijk in het PolyScope-tabblad: de robot beweegt!
+Ga terug naar het tabblad met VS Code. Open `voorbeelden/01_eerste_beweging.py` en klik rechtsboven op ▶ (*Run Python File*).
+Kijk in het robottabblad, bij **Move** of **Program → Graphics**: de arm beweegt!
 
 | Opdracht | Bestand |
 |---|---|
 | 1. Laat de robot bewegen | `voorbeelden/01_eerste_beweging.py` |
 | 2. Teken een vierkant | `voorbeelden/02_vierkant_tekenen.py` |
 | 3. Pak en plaats een blokje | `voorbeelden/03_pak_en_plaats.py` |
+
+Pas getallen aan, sla op (Cmd/Ctrl + S) en klik weer op ▶.
 
 ## De belangrijkste opdrachten
 ```python
@@ -32,15 +36,32 @@ r.uitgang(0, True)                              # gripper dicht (uitgang 0)
 r.start()                                       # stuur alles naar de robot
 ```
 
+## Programmeren zonder code (PolyScope)
+1. **Program → Empty Program → Structure → Move**.
+2. Klik op het waypoint → **Set waypoint** → beweeg de arm met de pijltjes → **OK**.
+3. Voeg meer punten toe met **Structure → Waypoint**, en eventueel **Wait**, **Set** (gripper) of **Loop**.
+4. Druk onderaan op ▶.
+5. Opslaan: **File → Save As**. Het programma komt in de map `programs` in VS Code (rechtermuisklik → *Download*).
+
+## Problemen?
+| Probleem | Oplossing |
+|---|---|
+| Geen link "ROBOT KLAAR!" in de terminal | Ververs het VS Code-tabblad, of open zelf de link: tabblad **Poorten** → regel 6080 → wereldbolletje → zet `/vnc.html` achter het adres |
+| Foutmelding **502 Bad Gateway** | De robot was nog niet klaar. Wacht 1 minuut. Helpt dat niet: tabblad **Poorten** → rechtermuisklik op 6080 → **Poort stoppen met doorsturen** → **Poort toevoegen** → `6080` |
+| Je ziet een lijst met bestanden | Klik op **vnc.html** |
+| Python: `Connection refused` | De robot start nog op. Wacht even en probeer opnieuw |
+| De arm beweegt niet | Staat de robot op ON en START? Kijk je in het tabblad Move of Graphics? |
+| Melding "Protective stop" | Het punt is onbereikbaar. Kies kleinere getallen en klik in PolyScope op **Enable** |
+
 ## Van simulator naar de echte robot
 Je code werkt ook op de echte UR10 bij de HU. Alleen het adres verandert:
 ```python
-r = Robot("192.168.1.10")
+r = Robot("192.168.1.10")   # IP-adres krijg je van je HU-begeleider
 ```
-Programma's die je in PolyScope maakt (`.urp`), komen in de map `programs`. Rechtermuisklik → *Download* om ze op te slaan.
 
 ## Stoppen
-Sluit het tabblad; de codespace stopt na 30 minuten vanzelf. Je werk blijft bewaard.
+Sluit het tabblad. De codespace stopt na 30 minuten vanzelf en je werk blijft bewaard.
+Opnieuw starten gaat via github.com/codespaces.
 Gratis: ongeveer 60 uur per maand per GitHub-account.
 
 ## Veiligheid (echte robot)
