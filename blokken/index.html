@@ -14,6 +14,7 @@
   :root {
     --bg: #f4f4f2; --paneel: #ffffff; --tekst: #1d1d1b; --zacht: #6b6b66;
     --rand: #dcdcd6; --balk: #1d1d1b; --accent: #e3051b; --groen: #1f8a4c; --code: #f7f7f4;
+    --arm: #4a6fa5; --pijl: #e3051b;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--tekst);
@@ -29,17 +30,61 @@
   #uitvoeren { background: var(--groen); font-size: 15px; padding: 8px 18px; }
   #stop { background: var(--accent); }
   .rechts { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
-  main { display: flex; height: calc(100% - 56px); }
+  body { display: flex; flex-direction: column; }
+  main { display: flex; flex: 1; min-height: 0; }
   #werkblad { flex: 1; min-width: 0; }
-  aside { width: 360px; display: flex; flex-direction: column; border-left: 1px solid var(--rand);
-    background: var(--paneel); }
+  aside { width: 380px; display: flex; flex-direction: column; border-left: 1px solid var(--rand);
+    background: var(--paneel); min-height: 0; }
   aside h2 { font-family: Oswald, sans-serif; font-weight: 500; font-size: 15px; text-transform: uppercase;
     letter-spacing: .5px; margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--rand); color: var(--zacht); }
+  #uitleg { padding: 10px 14px 14px; border-bottom: 1px solid var(--rand); }
+  #uitleg .plaat { background: #f9f9f7; border: 1px solid var(--rand); border-radius: 8px; height: 170px;
+    display: flex; align-items: center; justify-content: center; }
+  #uitleg .plaat svg { width: 100%; height: 100%; }
+  #uitleg h3 { font: 600 15px "Public Sans", sans-serif; margin: 10px 0 4px; }
+  #uitleg p { margin: 0; font-size: 14px; line-height: 1.45; color: #3a3a37; }
   pre { margin: 0; padding: 12px 14px; font: 13px/1.5 ui-monospace, Menlo, monospace; overflow: auto;
     white-space: pre-wrap; background: var(--code); }
-  #python { flex: 1; }
-  #uitvoer { height: 150px; border-top: 1px solid var(--rand); background: #fff; }
+  #uitleg .plaat { height: 130px; }
+  aside { width: 420px; }
+  .codekop { display: flex; align-items: center; gap: 6px; padding: 6px 14px 6px 0; border-bottom: 1px solid var(--rand); }
+  .codekop h2 { border: 0; flex: 1; }
+  .codekop button { font-size: 12px; padding: 5px 10px; }
+  #toepassen { background: var(--groen); }
+  #python { flex: 1; min-height: 120px; padding: 8px 0; cursor: default; }
+  #python .regel { padding: 0 14px; min-height: 19.5px; border-left: 4px solid transparent; }
+  #python .regel[data-id] { cursor: pointer; }
+  #python .regel[data-id]:hover { background: #eef1f6; }
+  #python .regel.actief { background: #fff3c4; border-left-color: #f2b705; }
+  #python .nr { display: inline-block; width: 22px; color: #b0b0aa; user-select: none; }
+  #editor { flex: 1; min-height: 120px; display: none; border: 0; outline: 0; resize: none; padding: 12px 14px;
+    font: 13px/1.5 ui-monospace, Menlo, monospace; background: #fffdf3; color: var(--tekst); tab-size: 4; }
+  aside.bewerken #python { display: none; }
+  aside.bewerken #editor { display: block; }
+  .alleenbewerken { display: none; }
+  aside.bewerken .alleenbewerken { display: inline-block; }
+  aside.bewerken .alleenbekijken { display: none; }
+  select { font: 600 14px "Public Sans", sans-serif; border-radius: 6px; padding: 7px 8px; border: 0;
+    background: #3b3b38; color: #fff; cursor: pointer; }
+  #uitvoer { height: 90px; border-top: 1px solid var(--rand); background: #fff; }
   .ok { color: var(--groen); } .fout { color: var(--accent); }
+
+  /* Overzicht van alle blokken */
+  #overzicht { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; z-index: 100;
+    align-items: flex-start; justify-content: center; padding: 30px 16px; overflow: auto; }
+  #overzicht.open { display: flex; }
+  #overzicht .doos { background: #fff; border-radius: 12px; max-width: 1100px; width: 100%; padding: 20px 24px; }
+  #overzicht .kop { display: flex; align-items: center; }
+  #overzicht h2 { font-family: Oswald, sans-serif; text-transform: uppercase; margin: 0; font-size: 22px; }
+  #overzicht .kop button { margin-left: auto; }
+  .raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin-top: 16px; }
+  .kaart { border: 1px solid var(--rand); border-radius: 10px; overflow: hidden; }
+  .kaart .plaat { height: 140px; background: #f9f9f7; border-bottom: 1px solid var(--rand); }
+  .kaart .plaat svg { width: 100%; height: 100%; }
+  .kaart .tekst { padding: 10px 12px; }
+  .kaart .blok { display: inline-block; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 13px; font-weight: 600; }
+  .kaart p { margin: 6px 0 0; font-size: 13px; line-height: 1.4; color: #3a3a37; }
+
   @media (max-width: 800px) {
     main { flex-direction: column; height: auto; }
     #werkblad { height: 70vh; }
@@ -52,83 +97,251 @@
   <h1>Robot <span>blokken</span></h1>
   <button id="uitvoeren">▶ Uitvoeren</button>
   <button id="stop">■ Stop</button>
-  <button id="aanzetten">⚡ Robot aanzetten</button>
+  <button id="aanzetten">⚡ Robot aan</button>
   <div class="rechts">
-    <a class="knop" id="robotlink" target="_blank">🤖 Open robotscherm</a>
-    <button id="download">⬇ Download .py</button>
-    <button id="leeg">🗑 Leeg</button>
+    <select id="voorbeelden" title="Laad een voorbeeldprogramma">
+      <option value="">📂 Voorbeelden…</option>
+      <option value="0">1. Eerste beweging</option>
+      <option value="1">2. Vierkant tekenen</option>
+      <option value="2">3. Pak en plaats</option>
+      <option value="3">4. Toren bouwen (variabele)</option>
+    </select>
+    <button id="alleblokken">📖 Uitleg blokken</button>
+    <a class="knop" id="robotlink" target="_blank">🤖 Robotscherm</a>
+    <button id="download" title="Download als Python-bestand">⬇ .py</button>
+    <button id="leeg" title="Werkblad leegmaken">🗑</button>
   </div>
 </header>
 <main>
   <div id="werkblad"></div>
   <aside>
-    <h2>Python-code van jouw blokken</h2>
+    <h2>Wat doet dit blok?</h2>
+    <div id="uitleg"></div>
+    <div class="codekop">
+      <h2>Python-code</h2>
+      <button id="bewerk" class="alleenbekijken">✏ Code aanpassen</button>
+      <button id="toepassen" class="alleenbewerken">✓ Zet om naar blokken</button>
+      <button id="annuleer" class="alleenbewerken">✕ Annuleer</button>
+    </div>
     <pre id="python"></pre>
+    <textarea id="editor" spellcheck="false"></textarea>
     <h2>Berichten</h2>
     <pre id="uitvoer">Sleep blokken naar het werkblad en klik op ▶ Uitvoeren.</pre>
   </aside>
 </main>
+<div id="overzicht"><div class="doos">
+  <div class="kop"><h2>Wat doen de blokken?</h2><button id="sluit">✕ Sluiten</button></div>
+  <div class="raster" id="raster"></div>
+</div></div>
 
 <script>
-// ---------- Eigen robotblokken ----------
+// =====================================================================
+// ILLUSTRATIES (getekend als SVG)
+// =====================================================================
+const ARM = "#4a6fa5", PIJL = "#e3051b", GRIJS = "#9a9a94", DONKER = "#1d1d1b";
+
+function svg(inhoud, label) {
+  return `<svg viewBox="0 0 240 160" xmlns="http://www.w3.org/2000/svg" font-family="Public Sans, sans-serif">
+    <defs><marker id="pk" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="${PIJL}"/></marker></defs>
+    ${inhoud}
+    ${label ? `<text x="232" y="16" text-anchor="end" font-size="11" fill="${GRIJS}">${label}</text>` : ""}
+  </svg>`;
+}
+const pijl = (x1, y1, x2, y2) =>
+  `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${PIJL}" stroke-width="4" stroke-linecap="round" marker-end="url(#pk)"/>`;
+const tekst = (x, y, t, kleur = PIJL, grootte = 13) =>
+  `<text x="${x}" y="${y}" font-size="${grootte}" font-weight="600" fill="${kleur}" text-anchor="middle">${t}</text>`;
+
+// Gripper getekend bij punt (x,y) dat de gripper naar beneden wijst. open = bek open
+function gripper(x, y, open = true, kleur = DONKER) {
+  const w = open ? 11 : 5;
+  return `<rect x="${x - 13}" y="${y}" width="26" height="8" rx="2" fill="${kleur}"/>
+    <rect x="${x - w - 3}" y="${y + 8}" width="4" height="16" fill="${kleur}"/>
+    <rect x="${x + w - 1}" y="${y + 8}" width="4" height="16" fill="${kleur}"/>`;
+}
+// Zijaanzicht van de arm in startpositie; gripper bij (gx, gy)
+function armZij(gx = 150, gy = 70, kleur = ARM, open = true) {
+  return `<line x1="10" y1="146" x2="230" y2="146" stroke="${GRIJS}" stroke-width="2"/>
+    <rect x="28" y="124" width="34" height="22" rx="3" fill="${DONKER}"/>
+    <path d="M45,120 L45,42 L${gx},42 L${gx},${gy}" fill="none" stroke="${kleur}" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="45" cy="120" r="9" fill="${kleur}"/><circle cx="45" cy="42" r="9" fill="${kleur}"/><circle cx="${gx}" cy="42" r="8" fill="${kleur}"/>
+    ${gripper(gx, gy, open)}`;
+}
+// Bovenaanzicht: voet bij (60,80), gripper bij (gx,gy)
+function armBoven(gx = 160, gy = 80, kleur = ARM) {
+  return `<circle cx="60" cy="80" r="20" fill="${DONKER}"/>
+    <line x1="60" y1="80" x2="${gx}" y2="${gy}" stroke="${kleur}" stroke-width="12" stroke-linecap="round"/>
+    <rect x="${gx - 9}" y="${gy - 9}" width="18" height="18" rx="3" fill="${DONKER}"/>`;
+}
+// Grote gripper met blokje; links en rechts = x-positie van de bekken
+function bek(links, rechts) {
+  return `<rect x="100" y="104" width="40" height="34" rx="3" fill="#d9a441"/>
+    <rect x="${links - 6}" y="64" width="${rechts - links + 16}" height="12" rx="3" fill="${DONKER}"/>
+    <rect x="${links}" y="76" width="6" height="62" fill="${DONKER}"/>
+    <rect x="${rechts - 2}" y="76" width="6" height="62" fill="${DONKER}"/>
+    <rect x="114" y="44" width="12" height="20" fill="${ARM}"/>`;
+}
+const spook = (x, y) => `<g opacity=".25">${gripper(x, y)}</g>`;
+
+const TEKENINGEN = {
+  startpositie: () => svg(armZij(), "zijaanzicht"),
+  omhoog:   () => svg(armZij(150, 70) + spook(150, 30) + pijl(185, 104, 185, 48), "zijaanzicht"),
+  omlaag:   () => svg(armZij(150, 62) + spook(150, 106) + pijl(185, 66, 185, 124), "zijaanzicht"),
+  naar_voren:    () => svg(armZij(130, 70) + spook(190, 70) + pijl(150, 108, 205, 108), "zijaanzicht"),
+  naar_achteren: () => svg(armZij(170, 70) + spook(110, 70) + pijl(150, 108, 95, 108), "zijaanzicht"),
+  naar_links:  () => svg(armBoven(160, 92) + `<g opacity=".25"><rect x="151" y="31" width="18" height="18" rx="3" fill="${DONKER}"/></g>` + pijl(185, 92, 185, 44) + tekst(205, 72, "links"), "bovenaanzicht"),
+  naar_rechts: () => svg(armBoven(160, 68) + `<g opacity=".25"><rect x="151" y="111" width="18" height="18" rx="3" fill="${DONKER}"/></g>` + pijl(185, 68, 185, 118) + tekst(205, 98, "rechts"), "bovenaanzicht"),
+  draai_arm: () => svg(armBoven(160, 80) + `<g opacity=".25"><line x1="60" y1="80" x2="131" y2="11" stroke="${ARM}" stroke-width="12" stroke-linecap="round"/></g>
+      <path d="M172,72 A112,112 0 0 0 140,22" fill="none" stroke="${PIJL}" stroke-width="4" stroke-linecap="round" marker-end="url(#pk)"/>` + tekst(192, 40, "draai"), "bovenaanzicht"),
+  draai_gripper: () => svg(`<rect x="95" y="55" width="50" height="50" rx="6" fill="${DONKER}"/>
+      <rect x="100" y="76" width="40" height="8" fill="#fff" opacity=".6"/>
+      <path d="M160,55 A45,45 0 1 0 160,105" fill="none" stroke="${PIJL}" stroke-width="4" stroke-linecap="round" marker-end="url(#pk)"/>`
+      + tekst(120, 140, "gripper draait om eigen as", DONKER, 12), ""),
+  punt: () => svg(`<line x1="40" y1="120" x2="200" y2="120" stroke="${GRIJS}" stroke-width="2" marker-end="url(#pk)"/>
+      <line x1="40" y1="120" x2="40" y2="20" stroke="${GRIJS}" stroke-width="2" marker-end="url(#pk)"/>
+      <line x1="40" y1="120" x2="95" y2="150" stroke="${GRIJS}" stroke-width="2" marker-end="url(#pk)"/>
+      ${tekst(205, 116, "x", DONKER)}${tekst(40, 14, "z", DONKER)}${tekst(104, 154, "y", DONKER)}
+      <line x1="150" y1="60" x2="150" y2="120" stroke="${PIJL}" stroke-dasharray="4 4" stroke-width="2"/>
+      <line x1="40" y1="60" x2="150" y2="60" stroke="${PIJL}" stroke-dasharray="4 4" stroke-width="2"/>
+      <circle cx="150" cy="60" r="8" fill="${PIJL}"/>${tekst(150, 44, "doel")}
+      <rect x="22" y="112" width="36" height="16" rx="3" fill="${DONKER}"/>`, "zoals Move → View"),
+  gripper_dicht: () => svg(bek(94, 142) + pijl(62, 112, 84, 112) + pijl(178, 112, 156, 112) + tekst(120, 34, "pakken", DONKER), ""),
+  gripper_open:  () => svg(bek(70, 166) + pijl(84, 92, 60, 92) + pijl(156, 92, 180, 92) + tekst(120, 34, "loslaten", DONKER), ""),
+  wacht: () => svg(`<circle cx="120" cy="80" r="50" fill="#fff" stroke="${DONKER}" stroke-width="5"/>
+      <line x1="120" y1="80" x2="120" y2="45" stroke="${DONKER}" stroke-width="5" stroke-linecap="round"/>
+      <line x1="120" y1="80" x2="145" y2="92" stroke="${PIJL}" stroke-width="5" stroke-linecap="round"/>`, ""),
+  bericht: () => svg(`<path d="M50,30 h140 a12,12 0 0 1 12,12 v56 a12,12 0 0 1 -12,12 h-90 l-24,22 v-22 h-26 a12,12 0 0 1 -12,-12 v-56 a12,12 0 0 1 12,-12z" fill="#fff" stroke="${DONKER}" stroke-width="4"/>`
+      + tekst(120, 76, "Hallo!", DONKER, 20), "logboek van de robot"),
+  herhaal: () => svg(`<path d="M80,50 A45,45 0 1 1 72,105" fill="none" stroke="#5ba55b" stroke-width="8" stroke-linecap="round"/>
+      <path d="M62,96 L72,112 L86,98" fill="none" stroke="#5ba55b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`
+      + tekst(118, 88, "× 3", DONKER, 24), ""),
+  geen: () => svg(tekst(120, 85, "Klik op een blok", GRIJS, 15), "")
+};
+
+// Uitleg per blok (titel, tekst, welke tekening)
+function uitlegVoor(b) {
+  if (!b) return { titel: "Klik op een blok", tekst: "Klik op een blok in het werkblad om te zien wat het doet.", plaat: "geen" };
+  const tov = b.getFieldValue && b.getFieldValue("TOV");
+  const tovTekst = tov === "voet"
+    ? " De richting is <b>vast in de ruimte</b> (t.o.v. de robotvoet): omhoog is altijd naar het plafond."
+    : " De richting is <b>t.o.v. de gripper</b>: draait de gripper, dan draait de richting mee. 'Omlaag' is de kant waar de gripper naartoe wijst.";
+  switch (b.type) {
+    case "robot_start": return { titel: "Ga naar startpositie", plaat: "startpositie",
+      tekst: "De arm gaat rechtop staan met de gripper naar beneden. Begin hier elk programma mee: zo weet je zeker waar de arm is." };
+    case "robot_richting": {
+      const r = b.getFieldValue("RICHTING");
+      const namen = { omhoog: "omhoog", omlaag: "omlaag", naar_links: "naar links", naar_rechts: "naar rechts",
+                      naar_voren: "naar voren", naar_achteren: "naar achteren" };
+      return { titel: `Beweeg ${namen[r]}`, plaat: r,
+        tekst: `De gripper schuift in een rechte lijn ${namen[r]}, zoveel millimeter als je invult. 100 mm = 10 cm.` + tovTekst };
+    }
+    case "robot_draai": return { titel: "Draai de arm", plaat: "draai_arm",
+      tekst: "De hele arm draait om de voet, zoals een draaimolen. Positief getal = linksom, negatief = rechtsom. 90 graden is een kwartslag." };
+    case "robot_draai_gripper": return { titel: "Draai de gripper", plaat: "draai_gripper",
+      tekst: "Alleen de gripper draait om zijn eigen as, de rest van de arm blijft staan. Handig om een blokje recht te zetten." };
+    case "robot_punt": return { titel: "Ga naar punt", plaat: "punt",
+      tekst: "De gripper gaat in een rechte lijn naar een vaste plek. x, y en z zijn de afstanden in mm vanaf de robotvoet, dezelfde getallen als in het robotscherm bij Move → Feature: View. z is de hoogte." };
+    case "robot_grijper": return b.getFieldValue("STAND") === "True"
+      ? { titel: "Gripper dicht", plaat: "gripper_dicht", tekst: "De bekken van de gripper gaan naar elkaar toe: de robot pakt iets vast." }
+      : { titel: "Gripper open", plaat: "gripper_open", tekst: "De bekken gaan uit elkaar: de robot laat los." };
+    case "robot_wacht": return { titel: "Wacht", plaat: "wacht",
+      tekst: "De robot staat even stil. Handig na het pakken, zodat de gripper echt dicht is voordat de arm beweegt." };
+    case "robot_bericht": return { titel: "Toon bericht", plaat: "bericht",
+      tekst: "Zet een tekst in het logboek van de robot (tabblad Log in het robotscherm). Zo zie je waar je programma is." };
+    case "controls_repeat_ext": return { titel: "Herhaal", plaat: "herhaal",
+      tekst: "Alles wat binnen dit blok staat, wordt een aantal keer achter elkaar uitgevoerd. Zo hoef je niet alles opnieuw te slepen." };
+    case "controls_for": return { titel: "Tel van ... tot ...", plaat: "herhaal",
+      tekst: "Herhaalt de blokken en houdt bij hoe vaak (in een variabele). Gebruik die variabele bijvoorbeeld om elke keer hoger te stapelen." };
+    default: return { titel: "Hulpblok", plaat: "geen",
+      tekst: "Dit is een reken-, vergelijk- of variabelenblok. Gebruik het om getallen in andere blokken te berekenen." };
+  }
+}
+
+function toonUitleg(b) {
+  const u = uitlegVoor(b);
+  document.getElementById("uitleg").innerHTML =
+    `<div class="plaat">${TEKENINGEN[u.plaat]()}</div><h3>${u.titel}</h3><p>${u.tekst}</p>`;
+}
+
+// Kleine icoontjes in de blokken zelf
+const icoon = s => "data:image/svg+xml;utf8," + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${s}</svg>`);
+const ICONEN = {
+  start: icoon(`<path d="M5 20h14M8 20v-4M8 16V5h9v5"/><path d="M14 10h6"/>`),
+  beweeg: icoon(`<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/>`),
+  draai: icoon(`<path d="M20 12a8 8 0 1 1-3-6.2"/><path d="M20 4v5h-5"/>`),
+  punt: icoon(`<circle cx="12" cy="10" r="3"/><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/>`),
+  gripper: icoon(`<path d="M6 4h12M8 4v8l-2 8M16 4v8l2 8"/>`),
+  wacht: icoon(`<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>`),
+  bericht: icoon(`<path d="M4 5h16v11H9l-5 4z"/>`)
+};
+const img = (src) => ({ type: "field_image", src, width: 18, height: 18, alt: "" });
+
+// =====================================================================
+// BLOKKEN
+// =====================================================================
 const KLEUR_BEWEGING = 210, KLEUR_GRIJPER = 20, KLEUR_ROBOT = 0, KLEUR_TIJD = 290;
+const TOV = { type: "field_dropdown", name: "TOV", options: [["t.o.v. gripper", "gripper"], ["t.o.v. robotvoet", "voet"]] };
 
 Blockly.defineBlocksWithJsonArray([
-  { type: "robot_start", message0: "ga naar startpositie",
-    previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING,
-    tooltip: "Arm rechtop, gripper wijst naar beneden" },
-  { type: "robot_richting", message0: "beweeg %1 %2 mm",
-    args0: [
+  { type: "robot_start", message0: "%1 ga naar startpositie", args0: [img(ICONEN.start)],
+    previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING },
+  { type: "robot_richting", message0: "%1 beweeg %2 %3 mm %4",
+    args0: [img(ICONEN.beweeg),
       { type: "field_dropdown", name: "RICHTING", options: [
         ["omhoog", "omhoog"], ["omlaag", "omlaag"], ["naar links", "naar_links"],
         ["naar rechts", "naar_rechts"], ["naar voren", "naar_voren"], ["naar achteren", "naar_achteren"]]},
-      { type: "input_value", name: "MM", check: "Number" }],
-    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING,
-    tooltip: "Beweeg in een rechte lijn vanaf waar de arm nu is" },
-  { type: "robot_draai", message0: "draai de arm %1 graden",
-    args0: [{ type: "input_value", name: "GRADEN", check: "Number" }],
-    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING,
-    tooltip: "Draai de hele arm om de voet. Positief = linksom" },
-  { type: "robot_punt", message0: "ga naar punt x %1 y %2 z %3 (mm)",
-    args0: [
+      { type: "input_value", name: "MM", check: "Number" }, TOV],
+    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING },
+  { type: "robot_draai", message0: "%1 draai de arm %2 graden",
+    args0: [img(ICONEN.draai), { type: "input_value", name: "GRADEN", check: "Number" }],
+    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING },
+  { type: "robot_draai_gripper", message0: "%1 draai de gripper %2 graden",
+    args0: [img(ICONEN.draai), { type: "input_value", name: "GRADEN", check: "Number" }],
+    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING },
+  { type: "robot_punt", message0: "%1 ga naar punt x %2 y %3 z %4 (mm)",
+    args0: [img(ICONEN.punt),
       { type: "input_value", name: "X", check: "Number" },
       { type: "input_value", name: "Y", check: "Number" },
       { type: "input_value", name: "Z", check: "Number" }],
-    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING,
-    tooltip: "Ga in een rechte lijn naar een vaste plek (mm vanaf de robotvoet)" },
-  { type: "robot_grijper", message0: "gripper %1",
-    args0: [{ type: "field_dropdown", name: "STAND", options: [["dicht", "True"], ["open", "False"]] }],
-    previousStatement: null, nextStatement: null, colour: KLEUR_GRIJPER,
-    tooltip: "Pak iets vast (dicht) of laat los (open)" },
-  { type: "robot_wacht", message0: "wacht %1 seconden",
-    args0: [{ type: "input_value", name: "SEC", check: "Number" }],
+    inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_BEWEGING },
+  { type: "robot_grijper", message0: "%1 gripper %2",
+    args0: [img(ICONEN.gripper), { type: "field_dropdown", name: "STAND", options: [["dicht", "True"], ["open", "False"]] }],
+    previousStatement: null, nextStatement: null, colour: KLEUR_GRIJPER },
+  { type: "robot_wacht", message0: "%1 wacht %2 seconden",
+    args0: [img(ICONEN.wacht), { type: "input_value", name: "SEC", check: "Number" }],
     inputsInline: true, previousStatement: null, nextStatement: null, colour: KLEUR_TIJD },
-  { type: "robot_bericht", message0: "toon bericht %1",
-    args0: [{ type: "field_input", name: "TEKST", text: "Hallo!" }],
-    previousStatement: null, nextStatement: null, colour: KLEUR_ROBOT,
-    tooltip: "Laat een tekst zien in het logboek van de robot" }
+  { type: "robot_bericht", message0: "%1 toon bericht %2",
+    args0: [img(ICONEN.bericht), { type: "field_input", name: "TEKST", text: "Hallo!" }],
+    previousStatement: null, nextStatement: null, colour: KLEUR_ROBOT }
 ]);
 
 const gen = python.pythonGenerator, O = python.Order;
 const getal = (b, naam) => gen.valueToCode(b, naam, O.NONE) || "0";
-gen.forBlock["robot_start"]    = () => "r.startpositie()\n";
-gen.forBlock["robot_richting"] = b => `r.${b.getFieldValue("RICHTING")}(${getal(b, "MM")})\n`;
-gen.forBlock["robot_draai"]    = b => `r.draai_basis(${getal(b, "GRADEN")})\n`;
-gen.forBlock["robot_punt"]     = b => `r.beweeg_lineair(${getal(b, "X")}, ${getal(b, "Y")}, ${getal(b, "Z")})\n`;
-gen.forBlock["robot_grijper"]  = b => `r.grijper(${b.getFieldValue("STAND")})\n`;
-gen.forBlock["robot_wacht"]    = b => `r.wacht(${getal(b, "SEC")})\n`;
-gen.forBlock["robot_bericht"]  = b => `r.bericht(${JSON.stringify(b.getFieldValue("TEKST"))})\n`;
+gen.forBlock["robot_start"]         = () => "r.startpositie()\n";
+gen.forBlock["robot_richting"]      = b => `r.${b.getFieldValue("RICHTING")}(${getal(b, "MM")}, "${b.getFieldValue("TOV")}")\n`;
+gen.forBlock["robot_draai"]         = b => `r.draai_basis(${getal(b, "GRADEN")})\n`;
+gen.forBlock["robot_draai_gripper"] = b => `r.draai_gripper(${getal(b, "GRADEN")})\n`;
+gen.forBlock["robot_punt"]          = b => `r.beweeg_lineair(${getal(b, "X")}, ${getal(b, "Y")}, ${getal(b, "Z")})\n`;
+gen.forBlock["robot_grijper"]       = b => `r.grijper(${b.getFieldValue("STAND")})\n`;
+gen.forBlock["robot_wacht"]         = b => `r.wacht(${getal(b, "SEC")})\n`;
+gen.forBlock["robot_bericht"]       = b => `r.bericht(${JSON.stringify(b.getFieldValue("TEKST"))})\n`;
 
-// ---------- Gereedschapskist ----------
+// =====================================================================
+// GEREEDSCHAPSKIST EN WERKBLAD
+// =====================================================================
 const getalVak = (naam, w) => ({ [naam]: { shadow: { type: "math_number", fields: { NUM: w } } } });
 const toolbox = { kind: "categoryToolbox", contents: [
   { kind: "category", name: "Beweging", colour: KLEUR_BEWEGING, contents: [
     { kind: "block", type: "robot_start" },
     { kind: "block", type: "robot_richting", inputs: getalVak("MM", 100) },
     { kind: "block", type: "robot_draai", inputs: getalVak("GRADEN", 45) },
-    { kind: "block", type: "robot_punt", inputs: { ...getalVak("X", -500), ...getalVak("Y", -200), ...getalVak("Z", 300) } } ]},
+    { kind: "block", type: "robot_draai_gripper", inputs: getalVak("GRADEN", 90) },
+    { kind: "block", type: "robot_punt", inputs: { ...getalVak("X", 500), ...getalVak("Y", 200), ...getalVak("Z", 300) } } ]},
   { kind: "category", name: "Gripper", colour: KLEUR_GRIJPER, contents: [
-    { kind: "block", type: "robot_grijper" } ]},
+    { kind: "block", type: "robot_grijper" },
+    { kind: "block", type: "robot_grijper", fields: { STAND: "False" } } ]},
   { kind: "category", name: "Tijd en tekst", colour: KLEUR_TIJD, contents: [
     { kind: "block", type: "robot_wacht", inputs: getalVak("SEC", 1) },
     { kind: "block", type: "robot_bericht" } ]},
@@ -151,34 +364,298 @@ const werkblad = Blockly.inject("werkblad", {
 });
 
 // ---------- Voorbeeldprogramma ----------
+const num = n => ({ shadow: { type: "math_number", fields: { NUM: n } } });
 const voorbeeld = { blocks: { languageVersion: 0, blocks: [{
   type: "robot_start", x: 40, y: 40, next: { block: {
-  type: "controls_repeat_ext", inputs: { TIMES: { shadow: { type: "math_number", fields: { NUM: 2 } } },
-    DO: { block: { type: "robot_richting", fields: { RICHTING: "omlaag" },
-      inputs: { MM: { shadow: { type: "math_number", fields: { NUM: 100 } } } },
+  type: "controls_repeat_ext", inputs: { TIMES: num(2),
+    DO: { block: { type: "robot_richting", fields: { RICHTING: "omlaag", TOV: "gripper" }, inputs: { MM: num(100) },
       next: { block: { type: "robot_grijper", fields: { STAND: "True" },
-      next: { block: { type: "robot_richting", fields: { RICHTING: "omhoog" },
-      inputs: { MM: { shadow: { type: "math_number", fields: { NUM: 100 } } } },
-      next: { block: { type: "robot_draai", inputs: { GRADEN: { shadow: { type: "math_number", fields: { NUM: 45 } } } },
+      next: { block: { type: "robot_richting", fields: { RICHTING: "omhoog", TOV: "gripper" }, inputs: { MM: num(100) },
+      next: { block: { type: "robot_draai", inputs: { GRADEN: num(45) },
       next: { block: { type: "robot_grijper", fields: { STAND: "False" } } } } } } } } } } } } } } }] } };
 
-const OPSLAG = "robotblokken-werkblad";
+const OPSLAG = "robotblokken-werkblad-v2";
 function laad() {
   let data = null;
   try { data = JSON.parse(localStorage.getItem(OPSLAG)); } catch (e) {}
-  Blockly.serialization.workspaces.load(data && data.blocks ? data : voorbeeld, werkblad);
+  try { Blockly.serialization.workspaces.load(data && data.blocks ? data : voorbeeld, werkblad); }
+  catch (e) { Blockly.serialization.workspaces.load(voorbeeld, werkblad); }
 }
 function bewaar() {
   try { localStorage.setItem(OPSLAG, JSON.stringify(Blockly.serialization.workspaces.save(werkblad))); } catch (e) {}
 }
 
-// ---------- Python-code tonen ----------
-function maakCode() {
-  const lijf = gen.workspaceToCode(werkblad);
-  return "from robot import Robot\n\nr = Robot()\n\n" + lijf + "\nr.start()\n";
+// =====================================================================
+// BLOKKEN -> CODE (met koppeling regel <-> blok)
+// =====================================================================
+// Nette Python voor variabelen
+gen.forBlock["math_change"] = (b, g) =>
+  `${g.getVariableName(b.getFieldValue("VAR"))} = ${g.getVariableName(b.getFieldValue("VAR"))} + ${g.valueToCode(b, "DELTA", O.ADDITIVE) || "0"}\n`;
+gen.STATEMENT_PREFIX = "#BLOK %1\n";
+
+let regels = [];   // [{tekst, id}]
+function maakRegels() {
+  const ruw = gen.workspaceToCode(werkblad).split("\n");
+  const uit = [{ tekst: "from robot import Robot" }, { tekst: "" }, { tekst: "r = Robot()" }, { tekst: "" }];
+  let id = null;
+  for (const r of ruw) {
+    const m = r.match(/^\s*#BLOK '(.*)'$/);
+    if (m) { id = m[1]; continue; }
+    if (/^\w+ = None$/.test(r)) continue;          // Blockly zet variabelen eerst op None
+    if (r.trim() === "" && uit.length === 4) continue; // geen lege regels bovenaan
+    uit.push({ tekst: r, id: id }); id = null;
+  }
+  while (uit.length && uit[uit.length - 1].tekst === "") uit.pop();
+  uit.push({ tekst: "" }, { tekst: "r.start()" });
+  return uit;
 }
-function toonCode() { document.getElementById("python").textContent = maakCode(); bewaar(); }
-werkblad.addChangeListener(e => { if (!e.isUiEvent) toonCode(); });
+const maakCode = () => maakRegels().map(r => r.tekst).join("\n") + "\n";
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+function toonCode() {
+  regels = maakRegels();
+  document.getElementById("python").innerHTML = regels.map((r, i) =>
+    `<div class="regel"${r.id ? ` data-id="${esc(r.id)}"` : ""}><span class="nr">${i + 1}</span>${esc(r.tekst) || " "}</div>`).join("");
+  markeer();
+}
+function statementBlok(b) {
+  while (b && !b.previousConnection && b.getParent()) b = b.getParent();
+  return b;
+}
+let gekozenId = null;
+function geselecteerd() {
+  const s = gekozenId ? werkblad.getBlockById(gekozenId) : null;
+  if (!s) return null;
+  return s.isShadow && s.isShadow() ? s.getParent() : s;
+}
+function markeer() {
+  const b = statementBlok(geselecteerd());
+  let eerste = null;
+  document.querySelectorAll("#python .regel").forEach(el => {
+    const aan = !!b && el.dataset.id === b.id;
+    el.classList.toggle("actief", aan);
+    if (aan && !eerste) eerste = el;
+  });
+  if (eerste) eerste.scrollIntoView({ block: "nearest" });
+}
+// Klik op een regel -> selecteer het blok
+document.getElementById("python").addEventListener("click", e => {
+  const el = e.target.closest(".regel[data-id]");
+  if (!el) return;
+  const b = werkblad.getBlockById(el.dataset.id);
+  if (b) { b.select(); gekozenId = b.id; werkblad.centerOnBlock(b.id); toonUitleg(b); markeer(); }
+});
+
+werkblad.addChangeListener(e => {
+  if (e.type === Blockly.Events.SELECTED) gekozenId = e.newElementId || null;
+  if (!e.isUiEvent) { toonCode(); bewaar(); }
+  toonUitleg(geselecteerd());
+  markeer();
+});
+
+// =====================================================================
+// CODE -> BLOKKEN (alleen de robotopdrachten, herhaal en variabelen)
+// =====================================================================
+function zetOm(code) {
+  const variabelen = {};
+  const varId = naam => (variabelen[naam] = variabelen[naam] || ("var_" + naam));
+  const NUM = /^-?\d+(\.\d+)?$/, NAAM = /^[A-Za-z_]\w*$/;
+  const OPS = { "+": "ADD", "-": "MINUS", "*": "MULTIPLY", "/": "DIVIDE" };
+
+  function waarde(s) {
+    s = s.trim();
+    if (NUM.test(s)) return { shadow: { type: "math_number", fields: { NUM: Number(s) } } };
+    const leeg = { shadow: { type: "math_number", fields: { NUM: 0 } } };
+    if (NAAM.test(s)) return { ...leeg, block: { type: "variables_get", fields: { VAR: { id: varId(s) } } } };
+    const m = s.match(/^(.+?)\s*([+\-*/])\s*(.+)$/);
+    if (m && (NUM.test(m[1].trim()) || NAAM.test(m[1].trim())) && (NUM.test(m[3].trim()) || NAAM.test(m[3].trim())))
+      return { ...leeg, block: { type: "math_arithmetic", fields: { OP: OPS[m[2]] },
+        inputs: { A: waarde(m[1]), B: waarde(m[3]) } } };
+    throw new Error(`"${s}" kan ik niet als getal of variabele lezen`);
+  }
+  const args = s => s.trim() === "" ? [] : s.split(",").map(a => a.replace(/^\s*\w+\s*=(?!=)/, "").trim());
+
+  function opdracht(t) {
+    let m;
+    if (/^r\.startpositie\(\)$/.test(t)) return { type: "robot_start" };
+    if ((m = t.match(/^r\.(omhoog|omlaag|naar_links|naar_rechts|naar_voren|naar_achteren)\((.*)\)$/))) {
+      const a = args(m[2]); const tov = (a[1] || '"gripper"').replace(/["']/g, "");
+      if (!["gripper", "voet"].includes(tov)) throw new Error(`kies "gripper" of "voet", niet "${tov}"`);
+      return { type: "robot_richting", fields: { RICHTING: m[1], TOV: tov }, inputs: { MM: waarde(a[0]) } };
+    }
+    if ((m = t.match(/^r\.draai_basis\((.*)\)$/)))   return { type: "robot_draai", inputs: { GRADEN: waarde(m[1]) } };
+    if ((m = t.match(/^r\.draai_gripper\((.*)\)$/))) return { type: "robot_draai_gripper", inputs: { GRADEN: waarde(m[1]) } };
+    if ((m = t.match(/^r\.beweeg_lineair\((.*)\)$/))) {
+      const a = args(m[1]); if (a.length < 3) throw new Error("ga naar punt heeft x, y en z nodig");
+      return { type: "robot_punt", inputs: { X: waarde(a[0]), Y: waarde(a[1]), Z: waarde(a[2]) } };
+    }
+    if ((m = t.match(/^r\.grijper\((True|False)\)$/))) return { type: "robot_grijper", fields: { STAND: m[1] } };
+    if ((m = t.match(/^r\.wacht\((.*)\)$/)))           return { type: "robot_wacht", inputs: { SEC: waarde(m[1]) } };
+    if ((m = t.match(/^r\.bericht\((["'])(.*)\1\)$/))) return { type: "robot_bericht", fields: { TEKST: m[2] } };
+    if ((m = t.match(/^(\w+)\s*\+=\s*(.+)$/)))
+      return { type: "math_change", fields: { VAR: { id: varId(m[1]) } }, inputs: { DELTA: waarde(m[2]) } };
+    if ((m = t.match(/^(\w+)\s*=\s*(.+)$/)) && m[1] !== "r")
+      return { type: "variables_set", fields: { VAR: { id: varId(m[1]) } }, inputs: { VALUE: waarde(m[2]) } };
+    return null;
+  }
+
+  // Regels met inspringing verzamelen
+  const lijst = [];
+  code.replace(/\t/g, "    ").split("\n").forEach((r, i) => {
+    const t = r.trim();
+    if (!t || t.startsWith("#")) return;
+    if (/^(import |from |sys\.|r\s*=\s*Robot\(|r\.start\(\)|r\.zet_aan\(\))/.test(t)) return;
+    lijst.push({ nr: i + 1, inspring: r.match(/^ */)[0].length, t });
+  });
+
+  let p = 0;
+  function blok(niveau) {
+    let eerste = null, laatste = null;
+    while (p < lijst.length && lijst[p].inspring >= niveau) {
+      const { nr, inspring, t } = lijst[p];
+      if (inspring > niveau) throw new Error(`regel ${nr}: inspringing klopt niet`);
+      p++;
+      let b, m;
+      try {
+        if ((m = t.match(/^for\s+(\w+)\s+in\s+range\(\s*(?:int\(\s*([^,()]+?)\s*\)|([^,]+?))\s*\)\s*:$/))) {
+          b = { type: "controls_repeat_ext", inputs: { TIMES: waarde(m[2] || m[3]) } };
+        } else if ((m = t.match(/^for\s+(\w+)\s+in\s+range\(\s*([^,]+?)\s*,\s*([^,]+?)\s*\)\s*:$/))) {
+          const tot = NUM.test(m[3]) ? String(Number(m[3]) - 1) : `${m[3]} - 1`;
+          b = { type: "controls_for", fields: { VAR: { id: varId(m[1]) } },
+                inputs: { FROM: waarde(m[2]), TO: waarde(tot), BY: waarde("1") } };
+        } else {
+          b = opdracht(t);
+          if (!b) throw new Error(`deze code ken ik niet als blok: ${t}`);
+        }
+      } catch (e) { throw new Error(e.message.startsWith("regel") ? e.message : `regel ${nr}: ${e.message}`); }
+      if (b.type === "controls_repeat_ext" || b.type === "controls_for") {
+        const binnen = p < lijst.length && lijst[p].inspring > inspring ? blok(lijst[p].inspring) : null;
+        if (!binnen) throw new Error(`regel ${nr}: na 'for' moeten ingesprongen regels komen`);
+        b.inputs.DO = { block: binnen };
+      }
+      if (!eerste) eerste = b; else laatste.next = { block: b };
+      laatste = b;
+    }
+    return eerste;
+  }
+  const start = lijst.length ? blok(lijst[0].inspring) : null;
+  if (p < lijst.length) throw new Error(`regel ${lijst[p].nr}: inspringing klopt niet`);
+  if (start) { start.x = 40; start.y = 40; }
+  return { blocks: { languageVersion: 0, blocks: start ? [start] : [] },
+           variables: Object.entries(variabelen).map(([name, id]) => ({ name, id })) };
+}
+
+function laadCode(code) {
+  const data = zetOm(code);           // gooit een fout als het niet lukt
+  werkblad.clear();
+  Blockly.serialization.workspaces.load(data, werkblad);
+  toonCode();
+}
+
+// ---------- Code aanpassen ----------
+const aside = document.querySelector("aside"), editor = document.getElementById("editor");
+const bewerken = () => aside.classList.contains("bewerken");
+document.getElementById("bewerk").onclick = () => {
+  editor.value = maakCode(); aside.classList.add("bewerken"); editor.focus();
+  meld("Pas de code aan en klik op ✓ Zet om naar blokken. ▶ Uitvoeren voert nu jouw code uit.", "");
+};
+document.getElementById("annuleer").onclick = () => { aside.classList.remove("bewerken"); meld("", ""); };
+document.getElementById("toepassen").onclick = () => {
+  try { laadCode(editor.value); aside.classList.remove("bewerken"); meld("✓ Code omgezet naar blokken.", "ok"); }
+  catch (e) { meld("Dit lukt nog niet: " + e.message, "fout"); }
+};
+editor.addEventListener("keydown", e => {   // Tab = 4 spaties
+  if (e.key === "Tab") { e.preventDefault(); const s = editor.selectionStart;
+    editor.setRangeText("    ", s, editor.selectionEnd, "end"); }
+});
+
+// =====================================================================
+// VOORBEELDEN (zelfde als de bestanden in de map 'voorbeelden')
+// =====================================================================
+const VOORBEELDEN = [
+`# 1. Eerste beweging: draai de arm heen en terug
+r.startpositie()
+r.draai_basis(90)
+r.wacht(1)
+r.draai_basis(-90)
+`,
+`# 2. Vierkant tekenen (pen in de gripper)
+r.startpositie()
+r.omlaag(100, "gripper")
+r.naar_voren(200, "voet")
+r.naar_links(200, "voet")
+r.naar_achteren(200, "voet")
+r.naar_rechts(200, "voet")
+r.omhoog(100, "gripper")
+`,
+`# 3. Pak en plaats een blokje
+r.startpositie()
+r.grijper(False)
+r.beweeg_lineair(500, 300, 300)
+r.omlaag(200, "gripper")
+r.grijper(True)
+r.wacht(0.5)
+r.omhoog(200, "gripper")
+r.beweeg_lineair(500, -300, 300)
+r.omlaag(200, "gripper")
+r.grijper(False)
+r.wacht(0.5)
+r.omhoog(200, "gripper")
+r.startpositie()
+`,
+`# 4. Toren bouwen: elk blokje 50 mm hoger neerzetten
+hoogte = 200
+r.startpositie()
+for count in range(3):
+    r.beweeg_lineair(500, 300, 300)
+    r.omlaag(200, "gripper")
+    r.grijper(True)
+    r.wacht(0.5)
+    r.omhoog(200, "gripper")
+    r.beweeg_lineair(500, -300, 300)
+    r.omlaag(hoogte, "gripper")
+    r.grijper(False)
+    r.wacht(0.5)
+    r.omhoog(hoogte, "gripper")
+    hoogte = hoogte - 50
+r.startpositie()
+`];
+document.getElementById("voorbeelden").onchange = e => {
+  const i = e.target.value; e.target.value = "";
+  if (i === "") return;
+  aside.classList.remove("bewerken");
+  laadCode(VOORBEELDEN[i]);
+  meld(`Voorbeeld ${Number(i) + 1} geladen. Klik op een blok of een coderegel om de koppeling te zien.`, "ok");
+};
+
+// ---------- Overzicht van alle blokken ----------
+const KAARTEN = [
+  ["ga naar startpositie", KLEUR_BEWEGING, "startpositie", "Arm rechtop, gripper naar beneden. Begin hier elk programma mee."],
+  ["beweeg omhoog", KLEUR_BEWEGING, "omhoog", "Gripper in een rechte lijn omhoog (mm)."],
+  ["beweeg omlaag", KLEUR_BEWEGING, "omlaag", "Gripper in een rechte lijn omlaag (mm)."],
+  ["beweeg naar voren", KLEUR_BEWEGING, "naar_voren", "Gripper in een rechte lijn naar voren (mm)."],
+  ["beweeg naar achteren", KLEUR_BEWEGING, "naar_achteren", "Gripper in een rechte lijn naar achteren (mm)."],
+  ["beweeg naar links", KLEUR_BEWEGING, "naar_links", "Gripper in een rechte lijn naar links (mm)."],
+  ["beweeg naar rechts", KLEUR_BEWEGING, "naar_rechts", "Gripper in een rechte lijn naar rechts (mm)."],
+  ["draai de arm", KLEUR_BEWEGING, "draai_arm", "De hele arm draait om de voet. Positief = linksom."],
+  ["draai de gripper", KLEUR_BEWEGING, "draai_gripper", "Alleen de gripper draait om zijn eigen as."],
+  ["ga naar punt x y z", KLEUR_BEWEGING, "punt", "Naar een vaste plek, in mm vanaf de robotvoet."],
+  ["gripper dicht", KLEUR_GRIJPER, "gripper_dicht", "Pak iets vast."],
+  ["gripper open", KLEUR_GRIJPER, "gripper_open", "Laat los."],
+  ["wacht", KLEUR_TIJD, "wacht", "Even stilstaan, bijvoorbeeld na het pakken."],
+  ["toon bericht", KLEUR_ROBOT, "bericht", "Tekst in het logboek van de robot."],
+  ["herhaal", 120, "herhaal", "Blokken binnenin een aantal keer uitvoeren."]
+];
+document.getElementById("raster").innerHTML = KAARTEN.map(([naam, kleur, plaat, t]) =>
+  `<div class="kaart"><div class="plaat">${TEKENINGEN[plaat]()}</div><div class="tekst">
+    <span class="blok" style="background:${Blockly.utils.colour.hueToHex(kleur)}">${naam}</span><p>${t}</p></div></div>`).join("")
+  + `<div class="kaart"><div class="tekst"><b>t.o.v. gripper of t.o.v. robotvoet?</b>
+    <p><b>Gripper:</b> de richting draait mee met de gripper. 'Omlaag' = de kant waar de gripper naartoe wijst.</p>
+    <p><b>Robotvoet:</b> de richting ligt vast in de ruimte. 'Omhoog' = altijd naar het plafond.</p></div></div>`;
+const overzicht = document.getElementById("overzicht");
+document.getElementById("alleblokken").onclick = () => overzicht.classList.add("open");
+document.getElementById("sluit").onclick = () => overzicht.classList.remove("open");
+overzicht.onclick = e => { if (e.target === overzicht) overzicht.classList.remove("open"); };
 
 // ---------- Knoppen ----------
 const uitvoer = document.getElementById("uitvoer");
@@ -195,13 +672,15 @@ async function stuur(pad, body) {
     uitvoer.textContent = "Geen verbinding met de blokkenserver. Ververs de pagina.";
   }
 }
-document.getElementById("uitvoeren").onclick = () => stuur("/uitvoeren", { code: maakCode() });
+function meld(tekst, soort) { uitvoer.className = soort; uitvoer.textContent = tekst; }
+const huidigeCode = () => bewerken() ? editor.value : maakCode();
+document.getElementById("uitvoeren").onclick = () => stuur("/uitvoeren", { code: huidigeCode() });
 document.getElementById("stop").onclick = () => stuur("/stop");
 document.getElementById("aanzetten").onclick = () => stuur("/aanzetten");
-document.getElementById("leeg").onclick = () => { if (werkblad.getAllBlocks(false).length) { werkblad.clear(); toonCode(); } };
+document.getElementById("leeg").onclick = () => { werkblad.clear(); };
 document.getElementById("download").onclick = () => {
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([maakCode()], { type: "text/x-python" }));
+  a.href = URL.createObjectURL(new Blob([huidigeCode()], { type: "text/x-python" }));
   a.download = "mijn_robotprogramma.py"; a.click();
 };
 
@@ -213,6 +692,7 @@ document.getElementById("robotlink").href = host + "/vnc.html?autoconnect=true&r
 
 laad();
 toonCode();
+toonUitleg(null);
 </script>
 </body>
 </html>
