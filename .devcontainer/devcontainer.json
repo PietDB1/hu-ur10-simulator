@@ -11,11 +11,11 @@
   "portsAttributes": {
     "6080": {
       "label": "Robot (PolyScope)",
-      "onAutoForward": "openBrowserOnce"
+      "onAutoForward": "silent"
     }
   },
 
-  "postCreateCommand": "pip install --user ur_rtde",
+  "postAttachCommand": "bash .devcontainer/wacht-op-robot.sh",
 
   "customizations": {
     "vscode": {
