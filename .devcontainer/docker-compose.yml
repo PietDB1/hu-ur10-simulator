@@ -1,12 +1,16 @@
 services:
+  # De robot-simulator (PolyScope), officieel image van Universal Robots
   ursim:
     image: universalrobots/ursim_cb3:3.15
     environment:
       - ROBOT_MODEL=UR10
     volumes:
+      # Programma's (.urp) die je in PolyScope opslaat komen in de map 'programs'
       - ../programs:/ursim/programs
     restart: unless-stopped
 
+  # De programmeeromgeving (VS Code + Python) deelt het netwerk met de simulator,
+  # zodat de robot in je code gewoon op 127.0.0.1 staat.
   dev:
     image: mcr.microsoft.com/devcontainers/python:3.12
     network_mode: service:ursim

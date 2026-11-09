@@ -15,6 +15,7 @@
     }
   },
 
+  "postCreateCommand": "pip install --user ur_rtde",
   "postAttachCommand": "bash .devcontainer/wacht-op-robot.sh",
 
   "customizations": {
