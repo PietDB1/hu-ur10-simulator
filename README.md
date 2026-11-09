@@ -20,7 +20,15 @@ Alles draait in je browser. Je hoeft niets te installeren.
 4. Klik op **▶ Uitvoeren** en kijk in het robotscherm hoe de arm beweegt.
    Rechts zie je de Python-code die bij jouw blokken hoort.
 
-Je blokken worden in je browser bewaard. Met **⬇ Download .py** sla je het programma op als Python-bestand.
+Je blokken worden in je browser bewaard. Met **⬇ .py** sla je het programma op als Python-bestand.
+
+**Blokken en code horen bij elkaar**
+- Klik op een blok: de bijbehorende regel Python-code licht geel op. Klik op een regel: het blok wordt geselecteerd.
+- Klik op **✏ Code aanpassen**, verander de code en klik op **✓ Zet om naar blokken**. De blokken passen zich aan.
+- Kies bij **📂 Voorbeelden** een voorbeeldprogramma. Dit zijn dezelfde programma's als in de map `voorbeelden`.
+- **📖 Uitleg blokken** laat met tekeningen zien wat elk blok doet.
+
+**Coördinaten:** x, y en z zijn dezelfde getallen als in het robotscherm bij **Move → Feature: View**.
 
 ## Je eerste programma in Python
 Ga terug naar het tabblad met VS Code. Open `voorbeelden/01_eerste_beweging.py` en klik rechtsboven op ▶ (*Run Python File*).
@@ -31,6 +39,7 @@ Kijk in het robottabblad, bij **Move** of **Program → Graphics**: de arm bewee
 | 1. Laat de robot bewegen | `voorbeelden/01_eerste_beweging.py` |
 | 2. Teken een vierkant | `voorbeelden/02_vierkant_tekenen.py` |
 | 3. Pak en plaats een blokje | `voorbeelden/03_pak_en_plaats.py` |
+| 4. Bouw een toren (variabele) | `voorbeelden/04_toren_bouwen.py` |
 
 Pas getallen aan, sla op (Cmd/Ctrl + S) en klik weer op ▶.
 
@@ -38,11 +47,15 @@ Pas getallen aan, sla op (Cmd/Ctrl + S) en klik weer op ▶.
 ```python
 from robot import Robot
 r = Robot()
-r.beweeg_gewrichten([0, -90, 90, -90, -90, 0])  # 6 hoeken in graden
-r.beweeg_lineair(x=-500, y=-200, z=300)         # rechte lijn naar x,y,z in mm
-r.wacht(1)                                      # seconden
-r.uitgang(0, True)                              # gripper dicht (uitgang 0)
-r.start()                                       # stuur alles naar de robot
+r.startpositie()                          # arm rechtop, gripper naar beneden
+r.omlaag(100, "gripper")                  # ook: omhoog, naar_links, naar_rechts, naar_voren, naar_achteren
+r.naar_links(50, "voet")                  # "gripper" = t.o.v. gripper, "voet" = t.o.v. robotvoet
+r.draai_basis(90)                         # hele arm draaien (graden)
+r.draai_gripper(90)                       # alleen de gripper draaien (graden)
+r.beweeg_lineair(500, 300, 300)           # naar punt x, y, z in mm (zoals Move -> View)
+r.grijper(True)                           # True = dicht, False = open
+r.wacht(1)                                # seconden
+r.start()                                 # stuur alles naar de robot
 ```
 
 ## Programmeren zonder code (PolyScope)

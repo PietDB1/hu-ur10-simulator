@@ -31,6 +31,16 @@ VERSNELLING_GEWRICHT = 0.5   # rad/s^2
 SNELHEID_LINEAIR = 0.1       # m/s   (= 100 mm/s)
 VERSNELLING_LINEAIR = 0.3    # m/s^2
 
+# Assenstelsel voor x/y-getallen:
+#   "view" = zoals PolyScope standaard toont (tabblad Move, Feature: View)
+#   "base" = het interne assenstelsel van de robot (Feature: Base)
+# View is 180 graden om de z-as gedraaid t.o.v. Base: x en y wisselen van teken.
+ASSENSTELSEL = "view"
+
+
+def _naar_base(x, y):
+    return (-x, -y) if ASSENSTELSEL == "view" else (x, y)
+
 
 class Robot:
     def __init__(self, ip=None):
@@ -47,8 +57,10 @@ class Robot:
         self.regels.append(f"movej({q}, a={VERSNELLING_GEWRICHT}, v={snelheid})")
 
     def beweeg_lineair(self, x, y, z, rx=0.0, ry=180.0, rz=0.0, snelheid=SNELHEID_LINEAIR):
-        """Beweeg in een rechte lijn naar positie x, y, z (mm) t.o.v. de robotvoet.
+        """Beweeg in een rechte lijn naar positie x, y, z (mm) t.o.v. de robotvoet,
+        in dezelfde getallen als PolyScope toont (Move > Feature: View).
         rx, ry, rz is de stand van de 'hand' in graden (standaard: gripper wijst naar beneden)."""
+        x, y = _naar_base(x, y)
         pose = [x / 1000, y / 1000, z / 1000,
                 math.radians(rx), math.radians(ry), math.radians(rz)]
         pose = [round(p, 5) for p in pose]
@@ -58,21 +70,48 @@ class Robot:
         """Ga naar de veilige startpositie (arm rechtop, gripper naar beneden)."""
         self.beweeg_gewrichten([0, -90, 90, -90, -90, 0])
 
-    def beweeg_relatief(self, dx=0, dy=0, dz=0, snelheid=SNELHEID_LINEAIR):
-        """Beweeg in een rechte lijn een stukje (mm) vanaf de huidige positie."""
+    def beweeg_relatief(self, dx=0, dy=0, dz=0, tov="gripper", snelheid=SNELHEID_LINEAIR):
+        """Beweeg in een rechte lijn een stukje (mm) vanaf de huidige positie.
+        tov="gripper": de richting is t.o.v. de gripper (draait mee met de gripper)
+        tov="voet":    de richting is t.o.v. de robotvoet (vast in de ruimte)"""
+        if tov == "voet":
+            dx, dy = _naar_base(dx, dy)
         d = [round(v / 1000, 5) for v in (dx, dy, dz)]
+        functie = "pose_trans" if tov == "gripper" else "pose_add"
         self.regels.append(
-            f"movel(pose_add(get_actual_tcp_pose(), p[{d[0]}, {d[1]}, {d[2]}, 0, 0, 0]), "
+            f"movel({functie}(get_actual_tcp_pose(), p[{d[0]}, {d[1]}, {d[2]}, 0, 0, 0]), "
             f"a={VERSNELLING_LINEAIR}, v={snelheid})")
 
-    # Richtingen t.o.v. de robotvoet. Staat de robot bij jullie anders opgesteld,
-    # draai dan hieronder de plus- en mintekens om.
-    def omhoog(self, mm):        self.beweeg_relatief(dz=mm)
-    def omlaag(self, mm):        self.beweeg_relatief(dz=-mm)
-    def naar_links(self, mm):    self.beweeg_relatief(dy=mm)
-    def naar_rechts(self, mm):   self.beweeg_relatief(dy=-mm)
-    def naar_voren(self, mm):    self.beweeg_relatief(dx=-mm)
-    def naar_achteren(self, mm): self.beweeg_relatief(dx=mm)
+    # Richtingen: (x, y, z)-teken per richting.
+    # Gripper: z wijst de gripper uit (dus 'omlaag' als de gripper naar beneden wijst).
+    # Voet: x en y zoals PolyScope ze toont (Feature: View), zie ASSENSTELSEL bovenaan.
+    # Klopt een richting niet met wat je in het robotscherm ziet? Draai dan hier het teken om.
+    RICHTINGEN = {
+        "gripper": {"omhoog": (0, 0, -1), "omlaag": (0, 0, 1),
+                    "naar_links": (0, -1, 0), "naar_rechts": (0, 1, 0),
+                    "naar_voren": (1, 0, 0), "naar_achteren": (-1, 0, 0)},
+        "voet":    {"omhoog": (0, 0, 1), "omlaag": (0, 0, -1),
+                    "naar_links": (0, -1, 0), "naar_rechts": (0, 1, 0),
+                    "naar_voren": (1, 0, 0), "naar_achteren": (-1, 0, 0)},
+    }
+
+    def beweeg(self, richting, mm, tov="gripper"):
+        sx, sy, sz = self.RICHTINGEN[tov][richting]
+        self.beweeg_relatief(sx * mm, sy * mm, sz * mm, tov=tov)
+
+    def omhoog(self, mm, tov="gripper"):        self.beweeg("omhoog", mm, tov)
+    def omlaag(self, mm, tov="gripper"):        self.beweeg("omlaag", mm, tov)
+    def naar_links(self, mm, tov="gripper"):    self.beweeg("naar_links", mm, tov)
+    def naar_rechts(self, mm, tov="gripper"):   self.beweeg("naar_rechts", mm, tov)
+    def naar_voren(self, mm, tov="gripper"):    self.beweeg("naar_voren", mm, tov)
+    def naar_achteren(self, mm, tov="gripper"): self.beweeg("naar_achteren", mm, tov)
+
+    def draai_gripper(self, graden, snelheid=SNELHEID_GEWRICHT):
+        """Draai alleen de gripper om zijn eigen as (laatste gewricht)."""
+        d = round(math.radians(graden), 5)
+        self.regels.append("q = get_actual_joint_positions()")
+        self.regels.append(
+            f"movej([q[0], q[1], q[2], q[3], q[4], q[5] + {d}], a={VERSNELLING_GEWRICHT}, v={snelheid})")
 
     def draai_basis(self, graden, snelheid=SNELHEID_GEWRICHT):
         """Draai de hele arm om de voet (positief = linksom)."""
