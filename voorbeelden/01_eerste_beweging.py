@@ -1,19 +1,17 @@
-# Opdracht 1: laat de robot bewegen
+# Voorbeeld 1: eerste beweging - draai de arm heen en terug
+# Hetzelfde programma staat in de blokken: Voorbeelden > 1. Eerste beweging
 # Start: klik rechtsboven op het driehoekje (Run Python File)
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from robot import Robot
 
-r = Robot()        # simulator. Voor de echte robot: Robot("192.168.1.10")
-r.zet_aan()        # zet de robot aan en laat de remmen los
+r = Robot()        # simulator. Voor de echte robot: Robot("IP-adres van de robot")
 
-# Hoeken in graden: basis, schouder, elleboog, pols1, pols2, pols3
-r.beweeg_gewrichten([0, -90, 90, -90, -90, 0])     # rechtop, 'klaar'-stand
+r.startpositie()
+r.draai_basis(90)
 r.wacht(1)
-r.beweeg_gewrichten([90, -90, 90, -90, -90, 0])    # draai de basis 90 graden
-r.wacht(1)
-r.beweeg_gewrichten([0, -90, 90, -90, -90, 0])     # terug
+r.draai_basis(-90)
 
 r.start()
 
-# Probeer zelf: verander de hoeken. Wat doet elk gewricht?
+# Probeer zelf: verander 90 in 45. Wat gebeurt er met een negatief getal?

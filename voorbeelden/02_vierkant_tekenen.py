@@ -1,22 +1,19 @@
-# Opdracht 2: teken een vierkant (denk aan een pen in de gripper)
+# Voorbeeld 2: teken een vierkant (denk aan een pen in de gripper)
+# Hetzelfde programma staat in de blokken: Voorbeelden > 2. Vierkant tekenen
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from robot import Robot
 
-r = Robot()
+r = Robot()        # simulator. Voor de echte robot: Robot("IP-adres van de robot")
 
-# Startpunt in mm t.o.v. de robotvoet
-x0, y0, z = -500, -200, 200
-zijde = 200   # mm
+r.startpositie()
+r.omlaag(100, "gripper")
+r.naar_voren(200, "voet")
+r.naar_links(200, "voet")
+r.naar_achteren(200, "voet")
+r.naar_rechts(200, "voet")
+r.omhoog(100, "gripper")
 
-r.beweeg_gewrichten([0, -90, 90, -90, -90, 0])   # veilige startstand
-r.beweeg_lineair(x0, y0, z + 50)                  # boven het papier
-r.beweeg_lineair(x0, y0, z)                       # pen omlaag
-
-for dx, dy in [(zijde, 0), (zijde, zijde), (0, zijde), (0, 0)]:
-    r.beweeg_lineair(x0 + dx, y0 + dy, z)
-
-r.beweeg_lineair(x0, y0, z + 50)                  # pen omhoog
 r.start()
 
-# Uitdaging: teken een driehoek, een cirkel (gebruik math.sin/cos) of je initialen.
+# Uitdaging: teken een rechthoek van 300 x 100 mm, of een driehoek.
