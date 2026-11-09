@@ -1,0 +1,17 @@
+services:
+  ursim:
+    image: universalrobots/ursim_cb3:3.15
+    environment:
+      - ROBOT_MODEL=UR10
+    volumes:
+      - ../programs:/ursim/programs
+    restart: unless-stopped
+
+  dev:
+    image: mcr.microsoft.com/devcontainers/python:3.12
+    network_mode: service:ursim
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    depends_on:
+      - ursim
