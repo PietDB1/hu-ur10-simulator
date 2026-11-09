@@ -1,0 +1,28 @@
+{
+  "name": "UR10 robot-simulator (HU)",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "shutdownAction": "stopCompose",
+
+  "hostRequirements": { "cpus": 2, "memory": "8gb" },
+
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": {
+      "label": "Robot (PolyScope)",
+      "onAutoForward": "openBrowserOnce"
+    }
+  },
+
+  "postCreateCommand": "pip install --user ur_rtde",
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    },
+    "codespaces": {
+      "openFiles": ["README.md", "voorbeelden/01_eerste_beweging.py"]
+    }
+  }
+}
