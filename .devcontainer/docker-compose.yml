@@ -9,6 +9,18 @@ services:
       - ../programs:/ursim/programs
     restart: unless-stopped
 
+  # De blokkenomgeving (webpagina op poort 8000) start automatisch mee
+  blokken:
+    image: mcr.microsoft.com/devcontainers/python:3.12
+    network_mode: service:ursim
+    volumes:
+      - ..:/app
+    working_dir: /app
+    command: python3 -u blokken/server.py
+    restart: unless-stopped
+    depends_on:
+      - ursim
+
   # De programmeeromgeving (VS Code + Python) deelt het netwerk met de simulator,
   # zodat de robot in je code gewoon op 127.0.0.1 staat.
   dev:

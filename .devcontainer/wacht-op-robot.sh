@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
-# Wacht tot de robot-simulator klaar is en toon dan de directe link.
+# Wacht tot de robot-simulator klaar is en toon dan de directe links.
 
 if [ -n "$CODESPACE_NAME" ]; then
-  URL="https://${CODESPACE_NAME}-6080.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}/vnc.html?autoconnect=true&resize=scale"
+  BASIS="https://${CODESPACE_NAME}"
+  DOMEIN="${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+  ROBOT="${BASIS}-6080.${DOMEIN}/vnc.html?autoconnect=true&resize=scale"
+  BLOKKEN="${BASIS}-8000.${DOMEIN}/"
 else
-  URL="http://localhost:6080/vnc.html?autoconnect=true&resize=scale"
+  ROBOT="http://localhost:6080/vnc.html?autoconnect=true&resize=scale"
+  BLOKKEN="http://localhost:8000/"
 fi
 
 echo ""
@@ -13,11 +17,15 @@ for i in $(seq 1 120); do
   if (echo > /dev/tcp/127.0.0.1/6080) 2>/dev/null; then
     echo ""
     echo "=============================================================="
-    echo " ROBOT KLAAR! Open de robot via deze link (Cmd/Ctrl + klik):"
+    echo " ROBOT KLAAR!  Open met Cmd/Ctrl + klik:"
     echo ""
-    echo " $URL"
+    echo " 1. Robotscherm (PolyScope):"
+    echo "    $ROBOT"
     echo ""
-    echo " Daarna in de robot: ON -> START -> OK"
+    echo " 2. Programmeren met blokken:"
+    echo "    $BLOKKEN"
+    echo ""
+    echo " Daarna in het robotscherm: ON -> START -> OK"
     echo "=============================================================="
     echo ""
     exit 0
@@ -26,4 +34,4 @@ for i in $(seq 1 120); do
 done
 
 echo "De robot is na 4 minuten nog niet klaar."
-echo "Probeer later deze link: $URL"
+echo "Probeer later deze link: $ROBOT"

@@ -7,10 +7,14 @@
 
   "hostRequirements": { "cpus": 2, "memory": "8gb" },
 
-  "forwardPorts": [6080],
+  "forwardPorts": [6080, 8000],
   "portsAttributes": {
     "6080": {
       "label": "Robot (PolyScope)",
+      "onAutoForward": "silent"
+    },
+    "8000": {
+      "label": "Blokken",
       "onAutoForward": "silent"
     }
   },
